@@ -76,6 +76,24 @@ h3 {
   gap: 1rem;
 }
 
+.app-footer {
+  position: fixed;
+  right: 0.9rem;
+  bottom: 0.55rem;
+  margin: 0;
+  padding: 0;
+  color: var(--muted);
+  font-size: 0.7rem;
+  opacity: 0.78;
+  text-align: right;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.app-footer p {
+  margin: 0;
+}
+
 .card {
   background: var(--card);
   border: 1px solid var(--line);
@@ -604,6 +622,12 @@ dialog::backdrop {
   .app-header {
     align-items: flex-start;
     margin-bottom: 0.65rem;
+  }
+
+  .app-footer {
+    right: 0.55rem;
+    bottom: 0.35rem;
+    font-size: 0.64rem;
   }
 
   .app-title {
