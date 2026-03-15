@@ -1,0 +1,542 @@
+:root {
+  --bg-1: #f8f4e8;
+  --bg-2: #f2e8cf;
+  --ink: #1d1b1a;
+  --muted: #6a6259;
+  --card: rgba(255, 253, 246, 0.85);
+  --line: rgba(50, 42, 30, 0.2);
+  --accent: #0f766e;
+  --accent-strong: #115e59;
+  --danger: #b91c1c;
+  --danger-strong: #991b1b;
+  --gold: #b88900;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Manrope', sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 20% 15%, #fff9de 0, transparent 35%), linear-gradient(140deg, var(--bg-1), var(--bg-2));
+  min-height: 100vh;
+  padding: 1.2rem;
+  position: relative;
+}
+
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+.bg-glow {
+  position: fixed;
+  inset: auto -10% -25% auto;
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, rgba(15, 118, 110, 0.25) 0, rgba(15, 118, 110, 0) 70%);
+  pointer-events: none;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: 'Archivo Black', sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.app-title {
+  color: var(--accent-strong);
+  line-height: 1.1;
+}
+
+.app-header {
+  max-width: 1200px;
+  margin: 0 auto 1rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.layout {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(8px);
+  border-radius: 16px;
+  box-shadow: 0 12px 28px rgba(23, 19, 13, 0.08);
+  padding: 1rem;
+  animation: reveal 420ms ease both;
+}
+
+#playersCard {
+  grid-column: span 4;
+}
+
+#roundsCard {
+  grid-column: span 8;
+}
+
+#rankingCard,
+#chartCard,
+#winsCard {
+  grid-column: span 6;
+}
+
+.card-head p {
+  margin: 0.3rem 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.row-between {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.inline-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input[type='text'],
+input[type='number'] {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.55rem 0.65rem;
+  background: #fffef9;
+}
+
+input[type='text'] {
+  width: 100%;
+}
+
+.btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 0.55rem 0.85rem;
+  background: var(--accent);
+  color: #f9fffe;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 140ms ease,
+    background-color 140ms ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  background: var(--accent-strong);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  transform: none;
+}
+
+.btn-secondary {
+  background: #1f2937;
+}
+
+.btn-secondary:hover {
+  background: #111827;
+}
+
+.btn-danger {
+  background: var(--danger);
+}
+
+.btn-danger:hover {
+  background: var(--danger-strong);
+}
+
+.tag-list {
+  margin: 0.8rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.tag-list li {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  background: #fffbef;
+  border: 1px solid #eadfca;
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+}
+
+.player-name {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-actions {
+  display: inline-flex;
+  gap: 0.3rem;
+}
+
+.player-chip-btn {
+  border: 0;
+  border-radius: 999px;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 0.45rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.edit-player {
+  background: #dff4ef;
+  color: #0f4e49;
+}
+
+.remove-player {
+  background: #f9d5d5;
+  color: #7f1d1d;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 0.8rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 480px;
+}
+
+th,
+td {
+  border: 1px solid var(--line);
+  padding: 0.45rem;
+  text-align: center;
+}
+
+th {
+  background: #f9f3e2;
+}
+
+.action-col {
+  width: 74px;
+  text-align: right;
+}
+
+th.action-col,
+td.action-col {
+  padding-right: 0.35rem;
+}
+
+tfoot td {
+  background: #f4ebd4;
+  font-weight: 700;
+}
+
+.footer-rank-row td {
+  background: #efe4c6;
+}
+
+td:first-child,
+th:first-child {
+  text-align: left;
+  font-weight: 700;
+  position: sticky;
+  left: 0;
+  background: #fdf8ea;
+}
+
+.points-input {
+  width: 88px;
+}
+
+.round-cell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.round-cell-end {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.table-action-btn {
+  border: 0;
+  border-radius: 999px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.delete-round-btn {
+  background: #f9d5d5;
+  color: #7f1d1d;
+}
+
+.add-round-btn {
+  background: #dff4ef;
+  color: #0f4e49;
+}
+
+.table-rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  background: #fff7dc;
+  border: 1px solid #e5cf8e;
+}
+
+.ranking-list {
+  margin: 0.85rem 0;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.ranking-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  background: #fff9ea;
+  border: 1px solid #f0e2bd;
+  border-radius: 10px;
+  padding: 0.4rem 0.55rem;
+}
+
+.ranking-list .top {
+  border-color: #e9c95f;
+  background: #fff3c8;
+}
+
+.ranking-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.chart-wrap {
+  position: relative;
+  height: 260px;
+  min-height: 220px;
+  margin-top: 0.8rem;
+}
+
+#scoreChart {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.wins-list {
+  margin-top: 0.8rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.win-row {
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid #eadfc5;
+  border-radius: 10px;
+  padding: 0.4rem 0.6rem;
+  background: #fff8e7;
+}
+
+.side-panel-actions {
+  margin-top: 0.8rem;
+}
+
+dialog {
+  border: 1px solid #d8c8aa;
+  border-radius: 14px;
+  width: min(520px, 92vw);
+}
+
+dialog::backdrop {
+  background: rgba(25, 20, 16, 0.44);
+}
+
+.popup-dialog {
+  width: min(460px, 92vw);
+  border: 1px solid #d8c8aa;
+  border-radius: 18px;
+  box-shadow: 0 20px 44px rgba(25, 20, 16, 0.2);
+}
+
+.popup-content {
+  background: linear-gradient(180deg, #fffdf6, #fff7e5);
+}
+
+.popup-eyebrow {
+  margin: 0 0 0.2rem;
+  color: var(--accent-strong);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+}
+
+.popup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0;
+  margin: 1rem 0 0;
+}
+
+.popup-actions-stack {
+  display: block;
+}
+
+.popup-choice-row {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.popup-top-action {
+  display: block;
+  margin-left: auto;
+}
+
+.popup-top-action[hidden] {
+  display: none !important;
+}
+
+.popup-choice-row,
+.popup-top-action {
+  margin-top: 0.6rem;
+}
+
+#renamePlayerInput {
+  width: 100%;
+  margin-top: 0.85rem;
+}
+
+.dialog-content {
+  margin: 0;
+  padding: 1rem;
+}
+
+.dialog-content p {
+  color: var(--muted);
+}
+
+.dialog-content menu {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0;
+  margin: 0.9rem 0 0;
+}
+
+.dialog-content menu.popup-actions-stack {
+  display: block;
+}
+
+.dialog-leaders {
+  margin: 0.7rem 0;
+  font-weight: 600;
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1000px) {
+  #playersCard,
+  #roundsCard,
+  #rankingCard,
+  #chartCard,
+  #winsCard {
+    grid-column: span 12;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    padding: 0.8rem;
+  }
+
+  .app-header {
+    align-items: flex-start;
+  }
+
+  .inline-form {
+    flex-direction: column;
+  }
+
+  .row-between {
+    flex-direction: column;
+  }
+
+  .ranking-actions {
+    flex-direction: column;
+  }
+
+  .round-cell {
+    min-width: 110px;
+  }
+
+  .popup-choice-row {
+    flex-direction: column;
+  }
+
+  .popup-top-action {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .chart-wrap {
+    height: 220px;
+    min-height: 200px;
+  }
+}

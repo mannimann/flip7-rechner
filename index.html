@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flip 7 Punktezähler</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <div class="bg-glow" aria-hidden="true"></div>
+
+    <header class="app-header">
+      <div>
+        <h1 class="app-title">Flip-7 Punktezähler</h1>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="card" id="playersCard">
+        <div class="card-head">
+          <h2>Spieler</h2>
+          <p>Hinzufügen und entfernen. Die Spieler stehen sofort in der Punktetabelle bereit.</p>
+        </div>
+        <form id="playerForm" class="inline-form">
+          <input id="playerNameInput" type="text" maxlength="20" placeholder="Name" required />
+          <button class="btn" type="submit">Spieler hinzufügen</button>
+        </form>
+        <ul id="playersList" class="tag-list"></ul>
+      </section>
+
+      <section class="card" id="roundsCard">
+        <div class="card-head row-between">
+          <div>
+            <h2>Runden und Punkte</h2>
+            <p>Punktetabelle: Runden als Zeilen, Spieler als Spalten.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="roundsTable">
+            <thead id="roundsThead"></thead>
+            <tbody id="roundsTbody"></tbody>
+            <tfoot id="roundsTfoot"></tfoot>
+          </table>
+        </div>
+      </section>
+
+      <section class="card" id="rankingCard">
+        <div class="card-head">
+          <h2>Platzierung</h2>
+          <p id="statusText">Noch kein Spielstand vorhanden.</p>
+        </div>
+        <ol id="rankingList" class="ranking-list"></ol>
+        <div class="ranking-actions">
+          <button id="restartFromRankingBtn" class="btn btn-danger" type="button">Neu starten</button>
+        </div>
+      </section>
+
+      <section class="card" id="chartCard">
+        <div class="card-head">
+          <h2>Punktediagramm</h2>
+          <p>Aktueller Punktestand aller Spieler.</p>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="scoreChart"></canvas>
+        </div>
+      </section>
+
+      <section class="card" id="winsCard">
+        <div class="card-head">
+          <h2>Siege aller Spiele</h2>
+          <p>Gesamtauswertung über alle bisher gespielten Partien.</p>
+        </div>
+        <div id="winsList" class="wins-list"></div>
+        <div class="side-panel-actions">
+          <button id="resetWinsBtn" class="btn btn-danger" type="button">Siege zurücksetzen</button>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="appDialog" class="popup-dialog">
+      <form method="dialog" class="dialog-content popup-content">
+        <p id="appDialogEyebrow" class="popup-eyebrow">Hinweis</p>
+        <h3 id="appDialogTitle">Meldung</h3>
+        <p id="appDialogMessage"></p>
+        <menu class="popup-actions">
+          <button id="appDialogCancel" value="cancel" class="btn btn-secondary" type="button">Abbrechen</button>
+          <button id="appDialogConfirm" value="confirm" class="btn" type="button">OK</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <dialog id="renameDialog" class="popup-dialog">
+      <form method="dialog" class="dialog-content popup-content">
+        <p class="popup-eyebrow">Spieler bearbeiten</p>
+        <h3>Spieler umbenennen</h3>
+        <input id="renamePlayerInput" type="text" maxlength="20" placeholder="Neuer Name" />
+        <menu class="popup-actions">
+          <button id="renameCancelBtn" value="cancel" class="btn btn-secondary" type="button">Abbrechen</button>
+          <button id="renameSaveBtn" value="save" class="btn" type="button">Speichern</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <dialog id="restartDialog" class="popup-dialog">
+      <form method="dialog" class="dialog-content popup-content">
+        <p class="popup-eyebrow">Spiel zurücksetzen</p>
+        <h3>Wie soll neu gestartet werden?</h3>
+        <p id="restartDialogMessage">Du kannst neu starten mit oder ohne Siegpunkt für den aktuellen Führenden.</p>
+        <menu class="popup-actions popup-actions-stack">
+          <button id="restartNoWinBtn" value="no-win" class="btn popup-top-action" type="button">
+            Ohne Sieg neu starten
+          </button>
+          <div class="popup-choice-row">
+            <button id="restartWithWinBtn" value="with-win" class="btn btn-danger" type="button">
+              Mit Sieg neu starten
+            </button>
+            <button id="restartCancelBtn" value="cancel" class="btn btn-secondary" type="button">Abbrechen</button>
+          </div>
+        </menu>
+      </form>
+    </dialog>
+  </body>
+</html>
