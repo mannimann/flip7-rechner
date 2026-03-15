@@ -77,17 +77,13 @@ h3 {
 }
 
 .app-footer {
-  position: fixed;
-  right: 0.9rem;
-  bottom: 0.55rem;
-  margin: 0;
-  padding: 0;
+  max-width: 1200px;
+  margin: 1rem auto 0;
+  padding: 0 0.2rem 0.2rem;
   color: var(--muted);
   font-size: 0.7rem;
   opacity: 0.78;
   text-align: right;
-  z-index: 4;
-  pointer-events: none;
 }
 
 .app-footer p {
@@ -625,8 +621,7 @@ dialog::backdrop {
   }
 
   .app-footer {
-    right: 0.55rem;
-    bottom: 0.35rem;
+    margin-top: 0.75rem;
     font-size: 0.64rem;
   }
 
