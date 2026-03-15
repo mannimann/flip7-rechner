@@ -1,5 +1,6 @@
 const TARGET_SCORE = 200;
 
+// Runtime-only app state (no persistence across page reloads).
 const state = {
   players: [],
   rounds: [
@@ -47,6 +48,8 @@ let dialogResolver;
 let renameResolver;
 let restartResolver;
 
+// ---------- Data Factory ----------
+
 function createPlayer(name) {
   return {
     id: crypto.randomUUID(),
@@ -55,6 +58,7 @@ function createPlayer(name) {
 }
 
 function createRound() {
+  // New rounds always include every current player with 0 points.
   const scores = {};
   for (const player of state.players) {
     scores[player.id] = 0;
@@ -70,6 +74,7 @@ function normalizePlayerName(name) {
   return name.trim().replace(/\s+/g, ' ');
 }
 
+// Ensures score values are always non-negative integer numbers.
 function clampScore(value) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) {
@@ -79,6 +84,8 @@ function clampScore(value) {
   return Math.max(0, Math.trunc(parsed));
 }
 
+// ---------- Dialog Helpers ----------
+
 function showPopup({
   title,
   message,
@@ -87,6 +94,7 @@ function showPopup({
   variant = 'info',
   showCancel = false,
 }) {
+  // Generic modal helper used for both info and confirmation dialogs.
   el.appDialogEyebrow.textContent = variant === 'danger' ? 'Bestätigung' : 'Hinweis';
   el.appDialogTitle.textContent = title;
   el.appDialogMessage.textContent = message;
@@ -110,6 +118,7 @@ function showAlert(title, message) {
   });
 }
 
+// Wrapper for dangerous/irreversible actions requiring user confirmation.
 function showConfirm(title, message, options = {}) {
   return showPopup({
     title,
@@ -138,6 +147,7 @@ function allPlayersBelowTarget() {
 }
 
 function showRestartDialog() {
+  // "Ohne Sieg" is only available before any player reaches target score.
   const canRestartWithoutWin = allPlayersBelowTarget();
   el.restartDialogMessage.textContent = canRestartWithoutWin
     ? 'Du kannst jetzt ohne Siegpunkt neu starten oder dem aktuellen Führenden einen Siegpunkt geben.'
@@ -150,6 +160,8 @@ function showRestartDialog() {
     el.restartDialog.showModal();
   });
 }
+
+// ---------- Game State + Scoring ----------
 
 function getWins() {
   return state.wins;
@@ -189,6 +201,7 @@ function getRanking() {
 }
 
 function getTotalsMap() {
+  // Totals are recomputed from rounds on each render to keep state minimal.
   const totals = {};
   for (const player of state.players) {
     totals[player.id] = 0;
@@ -224,6 +237,7 @@ function resetCurrentGame() {
 }
 
 function startNewGame({ shouldCountWin }) {
+  // Winner points are only awarded when explicitly requested.
   if (shouldCountWin && hasAnyData()) {
     addWinsForLeaders();
   }
@@ -231,6 +245,8 @@ function startNewGame({ shouldCountWin }) {
   resetCurrentGame();
   render();
 }
+
+// ---------- Mutations ----------
 
 async function addPlayer(name) {
   const normalized = normalizePlayerName(name);
@@ -280,6 +296,7 @@ async function renamePlayer(playerId) {
 
   const oldName = player.name;
   if (oldName !== normalized) {
+    // Keep historical wins attached when a player gets renamed.
     const wins = getWins();
     if (Object.prototype.hasOwnProperty.call(wins, oldName)) {
       wins[normalized] = (wins[normalized] || 0) + wins[oldName];
@@ -316,6 +333,7 @@ function updateScore(roundId, playerId, value) {
     return;
   }
 
+  // Score inputs are sanitized centrally: integer + non-negative.
   round.scores[playerId] = clampScore(value);
   render();
 }
@@ -329,6 +347,8 @@ function focusScoreInput(order) {
   target.focus();
   target.select();
 }
+
+// ---------- UI Rendering ----------
 
 async function removeRound(roundId) {
   const confirmed = await showConfirm('Runde löschen', 'Möchtest du diese Runde wirklich löschen?', {
@@ -467,6 +487,7 @@ function renderRoundsTable() {
       input.type = 'number';
       input.min = '0';
       input.step = '1';
+      // Stable keyboard navigation order across the complete score grid.
       const scoreOrder = roundIndex * state.players.length + playerIndex;
       input.dataset.scoreOrder = String(scoreOrder);
       input.tabIndex = 100 + scoreOrder;
@@ -487,6 +508,7 @@ function renderRoundsTable() {
             return;
           }
 
+          // Persist current value before jumping to the next/previous field.
           updateScore(round.id, player.id, input.value);
           requestAnimationFrame(() => {
             focusScoreInput(nextOrder);
@@ -666,6 +688,7 @@ function renderWinsPanel() {
 
 function renderChart() {
   const totals = getTotalsMap();
+  // Keep chart order aligned with the table/player order (not ranking order).
   const labels = state.players.map((player) => player.name);
   const data = state.players.map((player) => totals[player.id] || 0);
 
@@ -714,12 +737,15 @@ function renderChart() {
 }
 
 function render() {
+  // Single render entry point after each state mutation.
   renderPlayers();
   renderRoundsTable();
   renderRanking();
   renderWinsPanel();
   renderChart();
 }
+
+// ---------- Event Wiring ----------
 
 el.playerForm.addEventListener('submit', async (event) => {
   event.preventDefault();
