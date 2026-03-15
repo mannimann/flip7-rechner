@@ -335,6 +335,48 @@ th:first-child {
   color: #0f4e49;
 }
 
+.restart-round-btn {
+  background: var(--accent);
+  color: #f9fffe;
+  animation:
+    restart-pop 500ms cubic-bezier(0.34, 1.56, 0.64, 1) both,
+    restart-pulse 2s ease-in-out 500ms 3;
+}
+
+.restart-round-btn:hover {
+  background: var(--accent-strong);
+  animation: none;
+}
+
+.restart-round-btn--static {
+  animation: none;
+}
+
+.restart-round-btn--static:hover {
+  animation: none;
+}
+
+@keyframes restart-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4) rotate(-90deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes restart-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(15, 118, 110, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(15, 118, 110, 0.45);
+  }
+}
+
 .table-rank {
   display: inline-flex;
   align-items: center;
@@ -344,6 +386,31 @@ th:first-child {
   border-radius: 999px;
   background: #fff7dc;
   border: 1px solid #e5cf8e;
+}
+
+.winner-column-head {
+  background: #f4e4aa;
+  color: #5f4511;
+}
+
+.winner-column-cell {
+  background: #fff6da;
+}
+
+.winner-column-cell .points-input {
+  border-color: #d1aa4a;
+  background: #fffaf0;
+}
+
+.winner-total-cell {
+  font-weight: 800;
+  color: #5f4511;
+}
+
+.winner-rank-badge {
+  background: #ffe7a0;
+  border-color: #d3a73c;
+  color: #5f4511;
 }
 
 .ranking-list {

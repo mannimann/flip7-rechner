@@ -13,6 +13,7 @@ const state = {
 };
 
 let scoreChart;
+let prevGameOver = false;
 
 const el = {
   playerForm: document.getElementById('playerForm'),
@@ -234,6 +235,7 @@ function hasAnyData() {
 
 function resetCurrentGame() {
   state.rounds = [createRound()];
+  prevGameOver = false;
 }
 
 function startNewGame({ shouldCountWin }) {
@@ -433,6 +435,19 @@ function renderRoundsTable() {
   el.roundsTbody.innerHTML = '';
   el.roundsTfoot.innerHTML = '';
 
+  const totals = getTotalsMap();
+  const reachedTarget = Object.values(totals).some((score) => score >= TARGET_SCORE);
+  const winningPlayerIds = new Set();
+
+  if (reachedTarget && state.players.length) {
+    const topTotal = Math.max(...state.players.map((player) => totals[player.id] ?? 0));
+    for (const player of state.players) {
+      if ((totals[player.id] ?? 0) === topTotal) {
+        winningPlayerIds.add(player.id);
+      }
+    }
+  }
+
   const headRow = document.createElement('tr');
   const firstHead = document.createElement('th');
   firstHead.textContent = 'Runde';
@@ -440,7 +455,13 @@ function renderRoundsTable() {
 
   for (const player of state.players) {
     const playerHead = document.createElement('th');
-    playerHead.textContent = player.name;
+    if (winningPlayerIds.has(player.id)) {
+      playerHead.textContent = `${player.name} 👑`;
+      playerHead.classList.add('winner-column-head');
+      playerHead.title = 'Fuehrende Position';
+    } else {
+      playerHead.textContent = player.name;
+    }
     headRow.append(playerHead);
   }
 
@@ -470,8 +491,6 @@ function renderRoundsTable() {
     el.roundsTbody.append(placeholderRow);
   }
 
-  const totals = getTotalsMap();
-
   for (let roundIndex = 0; roundIndex < state.rounds.length; roundIndex += 1) {
     const round = state.rounds[roundIndex];
     const row = document.createElement('tr');
@@ -482,6 +501,9 @@ function renderRoundsTable() {
     for (let playerIndex = 0; playerIndex < state.players.length; playerIndex += 1) {
       const player = state.players[playerIndex];
       const scoreCell = document.createElement('td');
+      if (winningPlayerIds.has(player.id)) {
+        scoreCell.classList.add('winner-column-cell');
+      }
       const input = document.createElement('input');
       input.className = 'points-input';
       input.type = 'number';
@@ -568,6 +590,9 @@ function renderRoundsTable() {
     const playerTotalCell = document.createElement('td');
     const total = totals[player.id] ?? 0;
     playerTotalCell.textContent = total;
+    if (winningPlayerIds.has(player.id)) {
+      playerTotalCell.classList.add('winner-column-cell', 'winner-total-cell');
+    }
     footerRow.append(playerTotalCell);
   }
 
@@ -591,7 +616,6 @@ function renderRoundsTable() {
   el.roundsTfoot.append(footerRow);
 
   const positions = getPositionMap();
-  const reachedTarget = anyPlayerReachedTarget();
   const rankRow = document.createElement('tr');
   rankRow.className = 'footer-rank-row';
 
@@ -601,8 +625,14 @@ function renderRoundsTable() {
 
   for (const player of state.players) {
     const rankCell = document.createElement('td');
+    if (winningPlayerIds.has(player.id)) {
+      rankCell.classList.add('winner-column-cell');
+    }
     const rankBadge = document.createElement('span');
     rankBadge.className = 'table-rank';
+    if (winningPlayerIds.has(player.id)) {
+      rankBadge.classList.add('winner-rank-badge');
+    }
     rankBadge.textContent = `#${positions[player.id] ?? '–'}`;
     rankCell.append(rankBadge);
     rankRow.append(rankCell);
@@ -616,7 +646,10 @@ function renderRoundsTable() {
   if (reachedTarget) {
     const restartBtn = document.createElement('button');
     restartBtn.type = 'button';
-    restartBtn.className = 'table-action-btn add-round-btn';
+    const isNewlyOver = !prevGameOver;
+    restartBtn.className = isNewlyOver
+      ? 'table-action-btn restart-round-btn'
+      : 'table-action-btn restart-round-btn restart-round-btn--static';
     restartBtn.textContent = '↺';
     restartBtn.title = 'Spiel neu starten';
     restartBtn.addEventListener('click', async () => {
@@ -633,6 +666,7 @@ function renderRoundsTable() {
   rankRow.append(rankActionCell);
 
   el.roundsTfoot.append(rankRow);
+  prevGameOver = reachedTarget;
 }
 
 function renderRanking() {
