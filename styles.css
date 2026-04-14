@@ -457,7 +457,6 @@ th:first-child {
 
 .restart-round-btn:hover {
   background: var(--danger-strong);
-  animation: none;
 }
 
 .restart-round-btn--static {
