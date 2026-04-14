@@ -26,15 +26,22 @@
 
     <main class="layout">
       <section class="card" id="playersCard">
-        <div class="card-head">
-          <h2>Spieler</h2>
-          <p>Hinzufügen und entfernen. Die Spieler stehen sofort in der Punktetabelle bereit.</p>
-        </div>
-        <form id="playerForm" class="inline-form">
-          <input id="playerNameInput" type="text" maxlength="20" placeholder="Name" required />
-          <button class="btn" type="submit">Spieler hinzufügen</button>
-        </form>
-        <ul id="playersList" class="tag-list"></ul>
+        <details id="playersDetails" class="players-details" open>
+          <summary class="card-head players-summary">
+            <h2>Spieler</h2>
+            <span class="players-chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="players-content">
+            <p class="players-description">
+              Hinzufügen und entfernen. Die Spieler stehen sofort in der Punktetabelle bereit.
+            </p>
+            <form id="playerForm" class="inline-form">
+              <input id="playerNameInput" type="text" maxlength="20" placeholder="Name" required />
+              <button class="btn" type="submit">Spieler hinzufügen</button>
+            </form>
+            <ul id="playersList" class="tag-list"></ul>
+          </div>
+        </details>
       </section>
 
       <section class="card" id="roundsCard">
@@ -51,6 +58,7 @@
             <tfoot id="roundsTfoot"></tfoot>
           </table>
         </div>
+        <div id="roundsActions" class="rounds-actions"></div>
       </section>
 
       <section class="card" id="rankingCard">
@@ -82,6 +90,7 @@
         <div id="winsList" class="wins-list"></div>
         <div class="side-panel-actions">
           <button id="resetWinsBtn" class="btn btn-danger" type="button">Siege zurücksetzen</button>
+          <button id="resetAllDataBtn" class="btn btn-danger" type="button">Alle Daten löschen</button>
         </div>
       </section>
     </main>
@@ -124,10 +133,10 @@
             Ohne Sieg neu starten
           </button>
           <div class="popup-choice-row">
+            <button id="restartCancelBtn" value="cancel" class="btn btn-secondary" type="button">Abbrechen</button>
             <button id="restartWithWinBtn" value="with-win" class="btn btn-danger" type="button">
               Mit Sieg neu starten
             </button>
-            <button id="restartCancelBtn" value="cancel" class="btn btn-secondary" type="button">Abbrechen</button>
           </div>
         </menu>
       </form>

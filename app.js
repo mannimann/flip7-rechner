@@ -1,4 +1,5 @@
 const TARGET_SCORE = 200;
+const STORAGE_KEY = 'flip7-rechner-state-v1';
 
 // Runtime-only app state (no persistence across page reloads).
 const state = {
@@ -18,7 +19,9 @@ let prevGameOver = false;
 const el = {
   playerForm: document.getElementById('playerForm'),
   playerNameInput: document.getElementById('playerNameInput'),
+  playersDetails: document.getElementById('playersDetails'),
   playersList: document.getElementById('playersList'),
+  roundsActions: document.getElementById('roundsActions'),
   roundsThead: document.getElementById('roundsThead'),
   roundsTbody: document.getElementById('roundsTbody'),
   roundsTfoot: document.getElementById('roundsTfoot'),
@@ -42,12 +45,20 @@ const el = {
   restartWithWinBtn: document.getElementById('restartWithWinBtn'),
   winsList: document.getElementById('winsList'),
   resetWinsBtn: document.getElementById('resetWinsBtn'),
+  resetAllDataBtn: document.getElementById('resetAllDataBtn'),
   scoreChartCanvas: document.getElementById('scoreChart'),
 };
 
 let dialogResolver;
 let renameResolver;
 let restartResolver;
+const mobilePlayersQuery = window.matchMedia('(max-width: 640px)');
+
+function syncPlayersDetailsMode() {
+  if (!mobilePlayersQuery.matches) {
+    el.playersDetails.open = true;
+  }
+}
 
 // ---------- Data Factory ----------
 
@@ -83,6 +94,153 @@ function clampScore(value) {
   }
 
   return Math.max(0, Math.trunc(parsed));
+}
+
+function createRoundForPlayers(players) {
+  const scores = {};
+  for (const player of players) {
+    scores[player.id] = 0;
+  }
+
+  return {
+    id: crypto.randomUUID(),
+    scores,
+  };
+}
+
+function normalizeWins(winsInput) {
+  if (!winsInput || typeof winsInput !== 'object') {
+    return {};
+  }
+
+  const wins = {};
+  for (const [name, value] of Object.entries(winsInput)) {
+    if (typeof name !== 'string') {
+      continue;
+    }
+
+    const normalizedName = normalizePlayerName(name);
+    if (!normalizedName) {
+      continue;
+    }
+
+    wins[normalizedName] = clampScore(value);
+  }
+
+  return wins;
+}
+
+function normalizePlayers(playersInput) {
+  if (!Array.isArray(playersInput)) {
+    return [];
+  }
+
+  const players = [];
+  const seenIds = new Set();
+
+  for (const player of playersInput) {
+    if (!player || typeof player !== 'object') {
+      continue;
+    }
+
+    const normalizedName = normalizePlayerName(String(player.name || '')).slice(0, 20);
+    if (!normalizedName) {
+      continue;
+    }
+
+    let id = typeof player.id === 'string' && player.id ? player.id : crypto.randomUUID();
+    if (seenIds.has(id)) {
+      id = crypto.randomUUID();
+    }
+
+    seenIds.add(id);
+    players.push({ id, name: normalizedName });
+  }
+
+  return players;
+}
+
+function normalizeRounds(roundsInput, players) {
+  if (!Array.isArray(roundsInput)) {
+    return [createRoundForPlayers(players)];
+  }
+
+  const rounds = [];
+  const seenIds = new Set();
+
+  for (const round of roundsInput) {
+    if (!round || typeof round !== 'object') {
+      continue;
+    }
+
+    const scores = {};
+    const rawScores = round.scores && typeof round.scores === 'object' ? round.scores : {};
+    for (const player of players) {
+      scores[player.id] = clampScore(rawScores[player.id]);
+    }
+
+    let id = typeof round.id === 'string' && round.id ? round.id : crypto.randomUUID();
+    if (seenIds.has(id)) {
+      id = crypto.randomUUID();
+    }
+
+    seenIds.add(id);
+    rounds.push({ id, scores });
+  }
+
+  return rounds.length ? rounds : [createRoundForPlayers(players)];
+}
+
+function saveStateToStorage() {
+  try {
+    const snapshot = {
+      players: state.players.map((player) => ({
+        id: player.id,
+        name: player.name,
+      })),
+      rounds: state.rounds.map((round) => {
+        const scores = {};
+        for (const player of state.players) {
+          scores[player.id] = clampScore(round.scores[player.id]);
+        }
+
+        return {
+          id: round.id,
+          scores,
+        };
+      }),
+      wins: normalizeWins(state.wins),
+    };
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
+  } catch {
+    // Ignore storage write errors (e.g. private mode/quota exceeded).
+  }
+}
+
+function loadStateFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      return;
+    }
+
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') {
+      return;
+    }
+
+    const players = normalizePlayers(parsed.players);
+    const rounds = normalizeRounds(parsed.rounds, players);
+    const wins = normalizeWins(parsed.wins);
+
+    state.players = players;
+    state.rounds = rounds;
+    state.wins = wins;
+    prevGameOver = anyPlayerReachedTarget();
+  } catch {
+    // Ignore corrupted or unavailable storage data and continue with defaults.
+  }
 }
 
 // ---------- Dialog Helpers ----------
@@ -245,6 +403,21 @@ function startNewGame({ shouldCountWin }) {
   }
 
   resetCurrentGame();
+  render();
+}
+
+function clearAllData() {
+  state.players = [];
+  state.rounds = [createRound()];
+  state.wins = {};
+  prevGameOver = false;
+
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Ignore storage access issues and still reset in-memory state.
+  }
+
   render();
 }
 
@@ -434,6 +607,7 @@ function renderRoundsTable() {
   el.roundsThead.innerHTML = '';
   el.roundsTbody.innerHTML = '';
   el.roundsTfoot.innerHTML = '';
+  el.roundsActions.innerHTML = '';
 
   const totals = getTotalsMap();
   const reachedTarget = Object.values(totals).some((score) => score >= TARGET_SCORE);
@@ -479,6 +653,8 @@ function renderRoundsTable() {
     placeholder.textContent = 'Keine Spieler vorhanden.';
     placeholderRow.append(placeholder);
     el.roundsTbody.append(placeholderRow);
+    renderRoundsActions({ reachedTarget: false, canAddRound: false });
+    prevGameOver = false;
     return;
   }
 
@@ -598,20 +774,6 @@ function renderRoundsTable() {
 
   const footerActionCell = document.createElement('td');
   footerActionCell.className = 'action-col';
-  const addWrap = document.createElement('div');
-  addWrap.className = 'round-cell-end';
-
-  const addRoundBtn = document.createElement('button');
-  addRoundBtn.type = 'button';
-  addRoundBtn.className = 'table-action-btn add-round-btn';
-  addRoundBtn.textContent = '+';
-  addRoundBtn.title = 'Neue Runde hinzufügen';
-  addRoundBtn.addEventListener('click', () => {
-    void addRound();
-  });
-
-  addWrap.append(addRoundBtn);
-  footerActionCell.append(addWrap);
   footerRow.append(footerActionCell);
   el.roundsTfoot.append(footerRow);
 
@@ -640,33 +802,45 @@ function renderRoundsTable() {
 
   const rankActionCell = document.createElement('td');
   rankActionCell.className = 'action-col';
-  const rankActionWrap = document.createElement('div');
-  rankActionWrap.className = 'round-cell-end';
-
-  if (reachedTarget) {
-    const restartBtn = document.createElement('button');
-    restartBtn.type = 'button';
-    const isNewlyOver = !prevGameOver;
-    restartBtn.className = isNewlyOver
-      ? 'table-action-btn restart-round-btn'
-      : 'table-action-btn restart-round-btn restart-round-btn--static';
-    restartBtn.textContent = '↺';
-    restartBtn.title = 'Spiel neu starten';
-    restartBtn.addEventListener('click', async () => {
-      const choice = await showRestartDialog();
-      if (choice === 'cancel' || choice === null) {
-        return;
-      }
-      startNewGame({ shouldCountWin: choice === 'with-win' });
-    });
-    rankActionWrap.append(restartBtn);
-  }
-
-  rankActionCell.append(rankActionWrap);
   rankRow.append(rankActionCell);
 
   el.roundsTfoot.append(rankRow);
+  renderRoundsActions({ reachedTarget, canAddRound: true });
   prevGameOver = reachedTarget;
+}
+
+function renderRoundsActions({ reachedTarget, canAddRound }) {
+  el.roundsActions.innerHTML = '';
+
+  const addRoundBtn = document.createElement('button');
+  addRoundBtn.type = 'button';
+  addRoundBtn.className = 'rounds-action-btn rounds-action-btn-secondary';
+  addRoundBtn.textContent = 'Neue Runde hinzufügen';
+  addRoundBtn.disabled = !canAddRound;
+  addRoundBtn.addEventListener('click', () => {
+    void addRound();
+  });
+  el.roundsActions.append(addRoundBtn);
+
+  if (!reachedTarget) {
+    return;
+  }
+
+  const isNewlyOver = !prevGameOver;
+  const restartBtn = document.createElement('button');
+  restartBtn.type = 'button';
+  restartBtn.className = isNewlyOver
+    ? 'rounds-action-btn rounds-action-btn-danger restart-round-btn'
+    : 'rounds-action-btn rounds-action-btn-danger restart-round-btn restart-round-btn--static';
+  restartBtn.textContent = 'Neues Spiel starten';
+  restartBtn.addEventListener('click', async () => {
+    const choice = await showRestartDialog();
+    if (choice === 'cancel' || choice === null) {
+      return;
+    }
+    startNewGame({ shouldCountWin: choice === 'with-win' });
+  });
+  el.roundsActions.append(restartBtn);
 }
 
 function renderRanking() {
@@ -703,6 +877,7 @@ function renderWinsPanel() {
   const wins = getWins();
   const entries = Object.entries(wins).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'de'));
   el.resetWinsBtn.hidden = entries.length === 0;
+  el.resetAllDataBtn.hidden = false;
 
   el.winsList.innerHTML = '';
   if (!entries.length) {
@@ -777,6 +952,7 @@ function render() {
   renderRanking();
   renderWinsPanel();
   renderChart();
+  saveStateToStorage();
 }
 
 // ---------- Event Wiring ----------
@@ -789,6 +965,12 @@ el.playerForm.addEventListener('submit', async (event) => {
   }
   el.playerNameInput.focus();
 });
+
+if (typeof mobilePlayersQuery.addEventListener === 'function') {
+  mobilePlayersQuery.addEventListener('change', syncPlayersDetailsMode);
+} else if (typeof mobilePlayersQuery.addListener === 'function') {
+  mobilePlayersQuery.addListener(syncPlayersDetailsMode);
+}
 
 el.restartFromRankingBtn.addEventListener('click', async () => {
   const choice = await showRestartDialog();
@@ -806,7 +988,20 @@ el.resetWinsBtn.addEventListener('click', async () => {
     return;
   }
   setWins({});
-  renderWinsPanel();
+  render();
+});
+
+el.resetAllDataBtn.addEventListener('click', async () => {
+  const confirmed = await showConfirm(
+    'Alle Daten löschen',
+    'Möchtest du wirklich alle Spielerdaten, Runden und Siege löschen? Diese Aktion kann nicht rückgängig gemacht werden.',
+    { confirmLabel: 'Alles löschen' },
+  );
+  if (!confirmed) {
+    return;
+  }
+
+  clearAllData();
 });
 
 el.appDialogConfirm.addEventListener('click', () => {
@@ -881,4 +1076,6 @@ el.restartDialog.addEventListener('close', () => {
   }
 });
 
+loadStateFromStorage();
+syncPlayersDetailsMode();
 render();
