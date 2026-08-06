@@ -18,7 +18,14 @@
 
 body {
   margin: 0;
-  font-family: 'Manrope', sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
   color: var(--ink);
   background:
     radial-gradient(circle at 20% 15%, #fff9de 0, transparent 35%), linear-gradient(140deg, var(--bg-1), var(--bg-2));
@@ -50,7 +57,15 @@ h1,
 h2,
 h3 {
   margin: 0;
-  font-family: 'Archivo Black', sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+  font-weight: 900;
   letter-spacing: 0.02em;
 }
 
@@ -88,6 +103,21 @@ h3 {
 
 .app-footer p {
   margin: 0;
+}
+
+.app-footer p + p {
+  margin-top: 0.2rem;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .card {
@@ -653,6 +683,40 @@ dialog::backdrop {
 #renamePlayerInput {
   width: 100%;
   margin-top: 0.85rem;
+}
+
+.legal-dialog {
+  width: min(560px, 92vw);
+}
+
+.legal-scroll {
+  max-height: min(60vh, 420px);
+  overflow-y: auto;
+  margin-top: 0.6rem;
+  padding-right: 0.4rem;
+}
+
+.legal-scroll section + section {
+  margin-top: 1rem;
+}
+
+.legal-scroll h4 {
+  margin: 0 0 0.4rem;
+  font-size: 0.85rem;
+  color: var(--accent-strong);
+}
+
+.legal-scroll p {
+  margin: 0 0 0.5rem;
+  line-height: 1.4;
+}
+
+.legal-scroll p:last-child {
+  margin-bottom: 0;
+}
+
+.legal-scroll a {
+  color: inherit;
 }
 
 .dialog-content {

@@ -4,14 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Flip 7 Punktezähler</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;600;700&display=swap"
-      rel="stylesheet"
-    />
     <link rel="stylesheet" href="styles.css" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="vendor/chart.min.js"></script>
     <script defer src="app.js"></script>
   </head>
   <body>
@@ -96,7 +90,10 @@
     </main>
 
     <footer class="app-footer">
-      <p>Erstellt von Jakob Mann. Letzte Änderung: 15.03.2026</p>
+      <p>Erstellt von Jakob Mann. Letzte Änderung: 06.08.2026</p>
+      <p>
+        <button id="legalDialogOpenBtn" class="link-btn" type="button">Impressum &amp; Datenschutz</button>
+      </p>
     </footer>
 
     <dialog id="appDialog" class="popup-dialog">
@@ -138,6 +135,50 @@
               Mit Sieg neu starten
             </button>
           </div>
+        </menu>
+      </form>
+    </dialog>
+
+    <dialog id="legalDialog" class="popup-dialog legal-dialog">
+      <form method="dialog" class="dialog-content popup-content">
+        <p class="popup-eyebrow">Rechtliches</p>
+        <h3>Impressum &amp; Datenschutz</h3>
+        <div class="legal-scroll">
+          <section>
+            <h4>Impressum</h4>
+            <p>
+              Jakob Mann, Buschenaustr. 6, 04129 Leipzig<br />
+              <a id="impressumMail" href="#">E-Mail</a>
+            </p>
+          </section>
+          <section>
+            <h4>Datenschutz</h4>
+            <p>
+              <strong>Verantwortlicher:</strong> Jakob Mann, Buschenaustr. 6, 04129 Leipzig,
+              <a id="datenschutzMail" href="#">E-Mail</a>
+            </p>
+            <p>
+              <strong>Hosting:</strong> Beim Aufruf dieser Seite verarbeitet der Hosting-Anbieter automatisch technische
+              Zugriffsdaten (u. a. IP-Adresse, Datum/Uhrzeit, aufgerufene Datei) in Server-Logfiles. Dies dient der
+              technisch sicheren Auslieferung der Seite (Art. 6 Abs. 1 lit. f DSGVO).
+            </p>
+            <p>
+              <strong>Lokale Speicherung:</strong> Spielerliste und Punktestand werden ausschließlich lokal im Browser
+              (localStorage) gespeichert. Diese Daten verlassen dein Gerät nicht.
+            </p>
+            <p>
+              <strong>Externe Ressourcen:</strong> Alle eingebundenen Skripte und Schriftarten werden lokal von diesem
+              Server ausgeliefert, es werden keine Ressourcen von Drittanbietern nachgeladen.
+            </p>
+            <p>
+              Es werden keine Cookies gesetzt und keine Tracking- oder Analyse-Tools eingesetzt. Dir stehen die Rechte
+              auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung deiner Daten zu (Art. 15–18 DSGVO)
+              sowie ein Beschwerderecht bei einer Aufsichtsbehörde; wende dich dazu an die oben genannte E-Mail-Adresse.
+            </p>
+          </section>
+        </div>
+        <menu class="popup-actions">
+          <button id="legalDialogCloseBtn" value="close" class="btn" type="button">Schließen</button>
         </menu>
       </form>
     </dialog>

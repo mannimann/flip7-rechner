@@ -47,12 +47,32 @@ const el = {
   resetWinsBtn: document.getElementById('resetWinsBtn'),
   resetAllDataBtn: document.getElementById('resetAllDataBtn'),
   scoreChartCanvas: document.getElementById('scoreChart'),
+  impressumMail: document.getElementById('impressumMail'),
+  datenschutzMail: document.getElementById('datenschutzMail'),
+  legalDialog: document.getElementById('legalDialog'),
+  legalDialogOpenBtn: document.getElementById('legalDialogOpenBtn'),
+  legalDialogCloseBtn: document.getElementById('legalDialogCloseBtn'),
 };
 
 let dialogResolver;
 let renameResolver;
 let restartResolver;
 const mobilePlayersQuery = window.matchMedia('(max-width: 640px)');
+
+function initImpressumMail() {
+  const user = 'j-mann';
+  const domain = 'mail.de';
+  const address = `${user}@${domain}`;
+
+  for (const link of [el.impressumMail, el.datenschutzMail]) {
+    if (!link) {
+      continue;
+    }
+
+    link.href = `mailto:${address}`;
+    link.textContent = address;
+  }
+}
 
 function syncPlayersDetailsMode() {
   if (!mobilePlayersQuery.matches) {
@@ -1076,6 +1096,15 @@ el.restartDialog.addEventListener('close', () => {
   }
 });
 
+el.legalDialogOpenBtn.addEventListener('click', () => {
+  el.legalDialog.showModal();
+});
+
+el.legalDialogCloseBtn.addEventListener('click', () => {
+  el.legalDialog.close('close');
+});
+
+initImpressumMail();
 loadStateFromStorage();
 syncPlayersDetailsMode();
 render();
